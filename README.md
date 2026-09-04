@@ -14,6 +14,10 @@ Installs into `/usr/local/bin` (or `~/.local/bin`). `WORK_INSTALL_DIR` picks
 the directory, `WORK_VERSION=1.0.0` pins a release, and, optionally, `WORK_RELEASES_BASE`
 replaces the download location.
 
+At a terminal, `work` checks for a newer release at most once a day (never
+when piped, never blocking a command) and prints a one-line notice on
+stderr when one exists. `WORK_NO_UPDATE_CHECK=1` turns it off.
+
 ## Auth
 
 Grab your personal access token from Settings → API tokens in your Work account —

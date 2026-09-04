@@ -107,5 +107,9 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer, tty bool) int
 		return 1
 	}
 
-	return runResource(c, spec, rest[1:], ui{stdin: stdin, stdout: stdout, stderr: stderr, tty: tty, format: global.effectiveFormat()})
+	code := runResource(c, spec, rest[1:], ui{stdin: stdin, stdout: stdout, stderr: stderr, tty: tty, format: global.effectiveFormat()})
+	if code == 0 && tty {
+		maybeNotifyUpdate(stderr)
+	}
+	return code
 }
