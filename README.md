@@ -1,39 +1,26 @@
-# The work CLI
+# Work CLI
 
-The CLI for [Work](https://work.betterthangood.xyz), the
-small business tool that helps you win the work, deliver it and get paid.
-One Go binary covering the whole public API: CRM (companies, contacts,
-deals), invoicing and payments, projects and tasks. Anything a person can
-do in the web app, you (or your agent) can do here.
+`work` is the official command-line interface for Work. Manage companies, contacts, deals, invoices, projects and tasks from your terminal or through AI agents.
 
-Full documentation: [docs.betterthangood.xyz/work/cli](https://docs.betterthangood.xyz/work/cli).
-
-## Install
+## Install on Mac/Linux/Windows
 
 ```sh
 curl -fsSL https://work.betterthangood.xyz/install-cli | bash
 ```
 
-Works on macOS/Linux/Windows. The script detects the
-platform, downloads the matching archive from this repository's
-[releases](https://github.com/betterthangoodxyz/work-cli/releases), verifies
-its checksum against `checksums.txt` before anything touches the PATH, and
-installs into `/usr/local/bin` (or `~/.local/bin`). `WORK_INSTALL_DIR` picks
-the directory, `WORK_VERSION=1.0.0` pins a release, and `WORK_RELEASES_BASE`
-replaces the download location outright.
+Full documentation: [docs.betterthangood.xyz/work/cli](https://docs.betterthangood.xyz/work/cli).
 
-`checksums.txt` is written in the format `shasum -a 256 -c` reads, so a
-mirror — or a suspicious human — can verify a downloaded archive with the
-standard tool rather than trusting the script's own comparison.
+Installs into `/usr/local/bin` (or `~/.local/bin`). `WORK_INSTALL_DIR` picks
+the directory, `WORK_VERSION=1.0.0` pins a release, and, optionally, `WORK_RELEASES_BASE`
+replaces the download location.
 
 ## Auth
 
-A personal access token from Settings → API tokens in your Work account —
+Grab your personal access token from Settings → API tokens in your Work account —
 `read` for looking, `write` for changing. Then:
 
 ```sh
-work auth login                     # prompts, verifies the token, saves it
-pass work/token | work auth login   # or read it from stdin
+work auth login
 ```
 
 There is no `--token` flag — a token in argv lands in shell history and in
@@ -62,10 +49,6 @@ work contacts list
 work deals create --name "Lumen rebranding" --stage lead --value-cents 500000
 work invoices send 88
 ```
-
-Output is a table on a terminal, pretty JSON when piped (`--format` forces).
-Exit codes: 0 ok, 1 the server refused, 2 the command was wrong and nothing
-was sent.
 
 ## Agents
 
