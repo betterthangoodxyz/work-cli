@@ -44,29 +44,6 @@ var specResources = []resourceSpec{
 	},
 	{
 		name: "invoices", singular: "invoice", paramKey: "invoice",
-		ops: opList | opShow | opCreate,
-		fields: []fieldSpec{
-			{name: "issue_on", flag: "issue-on", kind: fieldString},
-			{name: "due_on", flag: "due-on", kind: fieldString},
-			{name: "subject", flag: "subject", kind: fieldString},
-			{name: "notes", flag: "notes", kind: fieldString},
-			{name: "company_id", flag: "company-id", kind: fieldInt},
-			{name: "contact_id", flag: "contact-id", kind: fieldInt},
-			{name: "lines", flag: "lines", kind: fieldJSON},
-		},
-		actions: []actionSpec{
-			{verb: "send", path: "/invoices/%d/send", summary: "Send the invoice to its billing contact and freeze its figures."},
-			{verb: "pay", path: "/invoices/%d/payments", summary: "Record a payment against the invoice; settles it when the balance reaches zero.", paramKey: "payment",
-				fields: []fieldSpec{
-					{name: "amount", flag: "amount", kind: fieldString},
-					{name: "paid_on", flag: "paid-on", kind: fieldString},
-					{name: "reference", flag: "reference", kind: fieldString},
-				},
-			},
-		},
-	},
-	{
-		name: "payments", singular: "payment", paramKey: "payment",
 		ops: opList | opShow,
 	},
 	{

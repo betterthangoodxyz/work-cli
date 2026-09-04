@@ -41,13 +41,12 @@ resource's every verb and flag. Help never needs a token.
 | Resource | Verbs |
 | --- | --- |
 | `companies`, `contacts`, `deals`, `projects`, `tasks` | `list`, `show`, `create`, `update`, `delete` |
-| `invoices` | `list`, `show`, `create`, plus `send` and `pay` — no update or delete; a sent invoice is a record |
-| `payments` | `list`, `show` — read-only; money in goes through `work invoices pay` |
+| `invoices` | `list`, `show` — read-only; invoices are authored by CSV import in the web app |
 
 ```sh
 work contacts list
 work deals create --name "Lumen rebranding" --stage lead --value-cents 500000
-work invoices send 88
+work invoices show 88
 ```
 
 ## Agents

@@ -1,6 +1,6 @@
 ---
 name: work
-description: Run a customer's Work account — CRM (companies, contacts, deals), invoicing and payments, and projects/tasks — through the `work` CLI. Use whenever asked to create, list, update, send, or get paid on anything in Work, or to onboard a customer's book of business into it.
+description: Run a customer's Work account — CRM (companies, contacts, deals), invoices, and projects/tasks — through the `work` CLI. Use whenever asked to create, list, update, or read anything in Work, or to onboard a customer's book of business into it.
 ---
 
 # Work
@@ -41,17 +41,15 @@ two accounts can be held side by side.
 
 - Piped (your case), output is the API's `data` payload as pretty JSON on
   stdout. On a terminal it renders as a table; `--format json|table` forces.
-- Money out is always integer **cents** (`value_cents`, `amount_cents`) with
+- Money out is always integer **cents** (`value_cents`, `total_cents`) with
   a `currency` beside it. Money in follows the flag's name: a `-cents` flag
-  takes cents (`work deals create --value-cents 500000` is $5,000), and the
-  invoice fields take **dollars** as a string (`--amount 1200.50`, a line's
-  `unit_price`). The flag name is the rule — never convert against it.
+  takes cents (`work deals create --value-cents 500000` is $5,000). The flag
+  name is the rule — never convert against it.
 - Exit 0 success, 1 the server refused (stderr has `code: message` plus
   per-field detail lines on a 422), 2 the command itself was wrong (unknown
   verb, bad flag) — nothing was sent.
-- A 422 detail names the API's column, which is not always the flag you set:
-  a bad invoice-line `unit_price` comes back as `unit_price_cents`. Match it
-  to the nearest flag or line field, fix that, and resend.
+- A 422 detail names the API's column, which is not always the flag you set.
+  Match it to the nearest flag, fix that, and resend.
 - Deletes answer 204: success is silence plus exit 0.
 
 ## Commands
@@ -77,8 +75,7 @@ the ground truth at the installed version):
 | `deals` | list, show, create, update, delete | `--name --stage --value-cents --expected-close-on --company-id --contact-id --owner-id` |
 | `projects` | list, show, create, update, delete | `--name --status --description --due-on --company-id --deal-id` |
 | `tasks` | list, show, create, update, delete | `--title --status --description --due-on --project-id --assignee-id` |
-| `invoices` | list, show, create + `send`, `pay` | `--issue-on --due-on --subject --notes --company-id --contact-id --lines` |
-| `payments` | list, show | read-only — money in goes through `invoices pay`, below |
+| `invoices` | list, show | read-only — invoices are created by CSV import in the web app |
 
 `projects` and `tasks` come from the Projects layer and answer 404 on an
 account without it.
@@ -89,35 +86,23 @@ Moving a deal through the pipeline is an update of its stage:
 work deals update 412 --stage won
 ```
 
-### Invoices are actions, not CRUD
+### Invoices are read-only
 
-An invoice has no update or delete — a sent invoice is a record of what was
-billed. Its lifecycle is designed actions:
+Invoices are authored outside the API — a person imports them from a CSV in
+the web app — so the CLI only lists and shows them:
 
 ```sh
-# Create takes its lines in one document; an invalid line rolls it all back.
-work invoices create --company-id 7 --contact-id 12 \
-  --issue-on 2026-08-27 --due-on 2026-09-26 \
-  --lines '[{"description": "Design retainer", "quantity": "1", "unit_price": "1200.50"}]'
-
-work invoices send 88        # emails the client and freezes the figures
-work invoices pay 88 --amount 1200.50 [--paid-on 2026-08-27] [--reference wire-442]
+work invoices list [--page N] [--per-page N]
+work invoices show 88
 ```
-
-Every action answers with the invoice as it now stands — no follow-up fetch
-needed. Sending is refused (422, with the reason) when the invoice was
-already sent, bills for nothing, or has no billing contact with an email.
 
 ## Conventions for agents
 
-**Safe to run unattended:** every list and show, `create`/`update` on
-contacts, companies, deals, projects and tasks, and invoice creation (a
-draft bills nobody).
+**Safe to run unattended:** every list and show, and `create`/`update` on
+contacts, companies, deals, projects and tasks.
 
 **Confirm with the person first:**
 
-- `work invoices send` — emails the client and freezes the figures.
-- `work invoices pay` — records real money against a real bill.
 - Any `delete` — there is no undo.
 - Anything while holding a write token on a large loop — the rate limit is
   1,000 requests/hour per token and every write lands in the account's
@@ -152,12 +137,6 @@ work deals create --name "Lumen rebranding" --stage lead \
   --value-cents 500000 --company-id 13
 # …the deal closes…
 work deals update 412 --stage won
-work invoices create --company-id 13 --contact-id 25 \
-  --issue-on 2026-08-27 --due-on 2026-09-26 \
-  --lines '[{"description": "Brand identity", "quantity": "1", "unit_price": "5000.00"}]'
-work invoices send 88
-# …the wire lands…
-work invoices pay 88 --amount 5000.00 --paid-on 2026-09-10 --reference wire-991
 ```
 
 If the customer has projects on: `work projects create --name … --company-id 13`,

@@ -111,6 +111,60 @@ func TestListPassesPaginationAndUnwrapsData(t *testing.T) {
 	}
 }
 
+// No resource currently has a designed action, but the dispatch mechanism
+// is generic — exercised directly here rather than through a resource that
+// doesn't exist in the spec.
+func TestRunActionPostsToItsPathWithOptionalFields(t *testing.T) {
+	api := newFakeAPI(t, func(w http.ResponseWriter, r *http.Request) {
+		respondData(w, 200, map[string]any{"id": 88, "status": "sent"})
+	})
+	c, err := newClient(api.server.URL, "work_pat_test")
+	if err != nil {
+		t.Fatalf("newClient: %v", err)
+	}
+	spec := resourceSpec{name: "invoices", singular: "invoice", paramKey: "invoice", ops: opShow}
+	action := actionSpec{
+		verb: "send", path: "/invoices/%d/send", paramKey: "delivery",
+		fields: []fieldSpec{{name: "note", flag: "note", kind: fieldString}},
+	}
+	u := ui{stdin: strings.NewReader(""), stdout: new(bytes.Buffer), stderr: new(bytes.Buffer)}
+
+	_, err = u.runAction(c, spec, action, []string{"88", "--note", "final"})
+	if err != nil {
+		t.Fatalf("runAction: %v", err)
+	}
+	if api.lastMethod != "POST" || api.lastPath != "/api/v1/invoices/88/send" {
+		t.Errorf("got %s %s", api.lastMethod, api.lastPath)
+	}
+	want := map[string]any{"delivery": map[string]any{"note": "final"}}
+	if !jsonEqual(api.lastBody, want) {
+		t.Errorf("body = %v, want %v", api.lastBody, want)
+	}
+}
+
+func TestShowFetchesByID(t *testing.T) {
+	api := newFakeAPI(t, func(w http.ResponseWriter, r *http.Request) {
+		respondData(w, 200, map[string]any{"id": 88, "subject": "Design retainer"})
+	})
+
+	code, stdout, _ := runCLI(t, api, "", false, "invoices", "show", "88")
+
+	if code != 0 {
+		t.Fatalf("exit %d", code)
+	}
+	if api.lastMethod != "GET" || api.lastPath != "/api/v1/invoices/88" {
+		t.Errorf("got %s %s", api.lastMethod, api.lastPath)
+	}
+	if !strings.Contains(stdout, `"subject": "Design retainer"`) {
+		t.Errorf("stdout = %q", stdout)
+	}
+
+	code, _, stderr := runCLI(t, api, "", false, "invoices", "show", "88", "extra")
+	if code != 2 || !strings.Contains(stderr, "unexpected argument") {
+		t.Errorf("show with extra arg: exit %d, stderr %q", code, stderr)
+	}
+}
+
 func TestCreateWrapsOnlyTheSetFlags(t *testing.T) {
 	api := newFakeAPI(t, func(w http.ResponseWriter, r *http.Request) {
 		respondData(w, 201, map[string]any{"id": 42})
@@ -128,32 +182,6 @@ func TestCreateWrapsOnlyTheSetFlags(t *testing.T) {
 	want := map[string]any{"contact": map[string]any{"first_name": "Ada", "company_id": float64(7)}}
 	if !jsonEqual(api.lastBody, want) {
 		t.Errorf("body = %v, want %v", api.lastBody, want)
-	}
-}
-
-func TestInvoiceCreateTakesLinesAsJSON(t *testing.T) {
-	api := newFakeAPI(t, func(w http.ResponseWriter, r *http.Request) {
-		respondData(w, 201, map[string]any{"id": 88, "status": "draft"})
-	})
-
-	code, _, _ := runCLI(t, api, "", false,
-		"invoices", "create", "--company-id", "7", "--issue-on", "2026-08-27", "--due-on", "2026-09-26",
-		"--lines", `[{"description": "Design retainer", "quantity": "1", "unit_price": "1200.50"}]`)
-
-	if code != 0 {
-		t.Fatalf("exit %d", code)
-	}
-	invoice, ok := api.lastBody["invoice"].(map[string]any)
-	if !ok {
-		t.Fatalf("body = %v", api.lastBody)
-	}
-	lines, ok := invoice["lines"].([]any)
-	if !ok || len(lines) != 1 {
-		t.Fatalf("lines = %v", invoice["lines"])
-	}
-	line := lines[0].(map[string]any)
-	if line["unit_price"] != "1200.50" {
-		t.Errorf("unit_price = %v", line["unit_price"])
 	}
 }
 
@@ -197,40 +225,10 @@ func TestDeleteIsSilentOnSuccess(t *testing.T) {
 	}
 }
 
-func TestInvoiceActions(t *testing.T) {
-	api := newFakeAPI(t, func(w http.ResponseWriter, r *http.Request) {
-		respondData(w, 200, map[string]any{"id": 88, "status": "sent"})
-	})
-
-	code, _, _ := runCLI(t, api, "", false, "invoices", "send", "88")
-	if code != 0 {
-		t.Fatalf("send: exit %d", code)
-	}
-	if api.lastMethod != "POST" || api.lastPath != "/api/v1/invoices/88/send" {
-		t.Errorf("send: got %s %s", api.lastMethod, api.lastPath)
-	}
-	if len(api.lastRawBody) != 0 {
-		t.Errorf("send: body = %q, want none", api.lastRawBody)
-	}
-
-	code, _, _ = runCLI(t, api, "", false,
-		"invoices", "pay", "88", "--amount", "1200.50", "--paid-on", "2026-08-27")
-	if code != 0 {
-		t.Fatalf("pay: exit %d", code)
-	}
-	if api.lastPath != "/api/v1/invoices/88/payments" {
-		t.Errorf("pay: got %s", api.lastPath)
-	}
-	want := map[string]any{"payment": map[string]any{"amount": "1200.50", "paid_on": "2026-08-27"}}
-	if !jsonEqual(api.lastBody, want) {
-		t.Errorf("pay: body = %v, want %v", api.lastBody, want)
-	}
-}
-
 func TestReadOnlyResourceRefusesWritesBeforeAnyRequest(t *testing.T) {
 	api := newFakeAPI(t, func(w http.ResponseWriter, r *http.Request) {})
 
-	code, _, stderr := runCLI(t, api, "", false, "payments", "create")
+	code, _, stderr := runCLI(t, api, "", false, "invoices", "create")
 
 	if code != 2 {
 		t.Errorf("exit %d, want 2", code)
@@ -319,8 +317,6 @@ func TestHelpFlagOnEveryVerb(t *testing.T) {
 		{[]string{"contacts", "create", "--help"}},
 		{[]string{"contacts", "update", "12", "-h"}},
 		{[]string{"contacts", "delete", "-h"}},
-		{[]string{"invoices", "send", "-h"}},
-		{[]string{"invoices", "pay", "88", "-h"}},
 	}
 	for _, c := range cases {
 		code, stdout, stderr := runCLI(t, nil, "", false, c.args...)
@@ -334,9 +330,9 @@ func TestHelpFlagOnEveryVerb(t *testing.T) {
 
 	// A verb the resource does not have is still a refusal, not usage for
 	// an endpoint that isn't there.
-	code, stdout, _ := runCLI(t, nil, "", false, "payments", "create", "-h")
+	code, stdout, _ := runCLI(t, nil, "", false, "invoices", "create", "-h")
 	if code != 2 || stdout != "" {
-		t.Errorf("payments create -h: exit %d, stdout %q", code, stdout)
+		t.Errorf("invoices create -h: exit %d, stdout %q", code, stdout)
 	}
 }
 
