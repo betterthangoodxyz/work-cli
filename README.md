@@ -1,10 +1,10 @@
 # The work CLI
 
-`work` — the command line for [Work](https://work.betterthangood.xyz), the
+The CLI for [Work](https://work.betterthangood.xyz), the
 small business tool that helps you win the work, deliver it and get paid.
 One Go binary covering the whole public API: CRM (companies, contacts,
 deals), invoicing and payments, projects and tasks. Anything a person can
-do in the web app, you — or your agent — can do here.
+do in the web app, you (or your agent) can do here.
 
 Full documentation: [docs.betterthangood.xyz/work/cli](https://docs.betterthangood.xyz/work/cli).
 
@@ -14,7 +14,7 @@ Full documentation: [docs.betterthangood.xyz/work/cli](https://docs.betterthango
 curl -fsSL https://work.betterthangood.xyz/install-cli | bash
 ```
 
-No runtime needed — one binary, macOS/Linux/Windows. The script detects the
+Works on macOS/Linux/Windows. The script detects the
 platform, downloads the matching archive from this repository's
 [releases](https://github.com/betterthangoodxyz/work-cli/releases), verifies
 its checksum against `checksums.txt` before anything touches the PATH, and
