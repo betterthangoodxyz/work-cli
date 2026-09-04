@@ -1,0 +1,3 @@
+# Build artifacts (bin/build) and a locally built binary.
+/dist
+/work

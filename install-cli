@@ -1,0 +1,108 @@
+#!/bin/sh
+# Installs the work CLI — Work's single-binary command line, generated from
+# the public API's OpenAPI spec (docs/cli.md).
+#
+#   curl -fsSL https://work.betterthangood.xyz/install-cli | bash
+#
+# Detects the OS and architecture, downloads the matching release archive
+# and its checksum, verifies the two agree, and installs into
+# /usr/local/bin (or ~/.local/bin when that is not writable). Override the
+# install dir with WORK_INSTALL_DIR, the version with WORK_VERSION
+# (e.g. WORK_VERSION=1.0.0), and the download location entirely with
+# WORK_RELEASES_BASE.
+
+set -eu
+
+RELEASES_ROOT="${WORK_RELEASES_ROOT:-https://github.com/betterthangoodxyz/work-cli/releases}"
+VERSION="${WORK_VERSION:-latest}"
+
+# A pinned version comes from that release's own tag; "latest" from the
+# alias GitHub keeps pointing at the newest one. WORK_RELEASES_BASE still
+# overrides the whole thing, which is how the build is tested locally.
+if [ "$VERSION" = "latest" ]; then
+  RELEASES_BASE="${WORK_RELEASES_BASE:-${RELEASES_ROOT}/latest/download}"
+else
+  RELEASES_BASE="${WORK_RELEASES_BASE:-${RELEASES_ROOT}/download/v${VERSION}}"
+fi
+
+detect_platform() {
+  os=$(uname -s | tr '[:upper:]' '[:lower:]')
+  arch=$(uname -m)
+  case "$os" in
+    darwin) os="darwin" ;;
+    linux) os="linux" ;;
+    mingw* | msys* | cygwin*) os="windows" ;;
+    *) echo "install-cli: unsupported OS: $os" >&2; exit 1 ;;
+  esac
+  case "$arch" in
+    x86_64 | amd64) arch="amd64" ;;
+    arm64 | aarch64) arch="arm64" ;;
+    *) echo "install-cli: unsupported architecture: $arch" >&2; exit 1 ;;
+  esac
+  echo "${os}_${arch}"
+}
+
+install_dir() {
+  if [ -n "${WORK_INSTALL_DIR:-}" ]; then
+    echo "$WORK_INSTALL_DIR"
+  elif [ -w /usr/local/bin ]; then
+    echo "/usr/local/bin"
+  else
+    echo "${HOME}/.local/bin"
+  fi
+}
+
+main() {
+  platform=$(detect_platform)
+  dest_dir=$(install_dir)
+  tmp=$(mktemp -d)
+  trap 'rm -rf "$tmp"' EXIT
+
+  archive="work_${platform}.tar.gz"
+  [ "${platform%_*}" = "windows" ] && archive="work_${platform}.zip"
+
+  echo "Downloading work ${VERSION} for ${platform}…"
+  curl -fsSL "${RELEASES_BASE}/${archive}" -o "${tmp}/${archive}"
+  curl -fsSL "${RELEASES_BASE}/checksums.txt" -o "${tmp}/checksums.txt"
+
+  # Verify before install: a truncated or tampered archive must never reach
+  # the PATH. Matched with awk on the whole field rather than a grep
+  # pattern, so a filename is compared literally and exactly one line can
+  # supply the hash.
+  expected=$(awk -v want="$archive" '$2 == want { print $1; found++ } END { exit found != 1 }' \
+    "${tmp}/checksums.txt") || expected=""
+  if [ -z "$expected" ]; then
+    echo "install-cli: no checksum for ${archive} in checksums.txt" >&2
+    exit 1
+  fi
+  if command -v shasum >/dev/null 2>&1; then
+    actual=$(shasum -a 256 "${tmp}/${archive}" | awk '{print $1}')
+  else
+    actual=$(sha256sum "${tmp}/${archive}" | awk '{print $1}')
+  fi
+  if [ "$expected" != "$actual" ]; then
+    echo "install-cli: checksum mismatch for ${archive} — not installing." >&2
+    exit 1
+  fi
+
+  if [ "${archive%.zip}" != "$archive" ]; then
+    unzip -qo "${tmp}/${archive}" -d "$tmp"
+  else
+    tar -xzf "${tmp}/${archive}" -C "$tmp"
+  fi
+
+  mkdir -p "$dest_dir"
+  binary="work"
+  [ "${platform%_*}" = "windows" ] && binary="work.exe"
+  mv "${tmp}/${binary}" "${dest_dir}/${binary}"
+  chmod +x "${dest_dir}/${binary}"
+
+  echo "Installed ${dest_dir}/${binary} — $("${dest_dir}/${binary}" version)"
+  case ":$PATH:" in
+    *":${dest_dir}:"*) ;;
+    *) echo "Note: ${dest_dir} is not on your PATH yet." ;;
+  esac
+  echo "Next: create a token in Settings → API tokens, then \`work auth login\`."
+}
+
+main

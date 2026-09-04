@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Cross-compiles the work CLI into dist/ and writes checksums.txt —
+# the artifacts install-cli downloads.
+#
+#   bin/build 1.0.0
+#
+# The version becomes `work version`'s answer and belongs in the release
+# tag (v1.0.0) the archives are attached to. dist/ is gitignored;
+# these are build artifacts, not source. The release workflow
+# (.github/workflows/release.yml) runs this on every version tag.
+set -euo pipefail
+
+version="${1:?usage: bin/build <version, e.g. 1.0.0>}"
+
+dist="$(dirname "$0")/../dist"
+rm -rf "$dist"
+mkdir -p "$dist"
+
+targets=(darwin_amd64 darwin_arm64 linux_amd64 linux_arm64 windows_amd64)
+
+for target in "${targets[@]}"; do
+  os="${target%_*}"
+  arch="${target#*_}"
+  name="work_${os}_${arch}"
+  binary="work"
+  [ "$os" = "windows" ] && binary="work.exe"
+
+  echo "Building ${name}…"
+  mkdir -p "${dist}/${name}"
+  (cd "$(dirname "$0")/.." && \
+    GOOS="$os" GOARCH="$arch" CGO_ENABLED=0 \
+    go build -trimpath -ldflags "-s -w -X main.version=${version}" -o "dist/${name}/${binary}" .)
+
+  # The binary sits at the archive's root, so install-cli — and anyone
+  # unpacking by hand — gets ./work, not a nested platform directory.
+  if [ "$os" = "windows" ]; then
+    (cd "${dist}/${name}" && zip -qr "../${name}.zip" "${binary}")
+  else
+    (cd "${dist}/${name}" && tar -czf "../${name}.tar.gz" "${binary}")
+  fi
+  rm -rf "${dist:?}/${name}"
+done
+
+# Left exactly as shasum writes it (hash, two spaces, name): that is the
+# format `shasum -a 256 -c checksums.txt` and GNU sha256sum -c both require,
+# so anyone mirroring the release can verify it the standard way.
+(cd "$dist" && shasum -a 256 work_* > checksums.txt)
+
+echo
+echo "Built into dist/:"
+ls -1 "$dist"
