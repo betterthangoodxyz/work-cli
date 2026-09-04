@@ -5,7 +5,8 @@ description: Run a customer's Work account — CRM (companies, contacts, deals),
 
 # Work
 
-Work is the system a business runs on: customers, delivery work, money. The
+Work is a small business tool to help you win the work, deliver it and get
+paid: customers, delivery work, money. The
 `work` CLI covers the whole public API — anything a person can do in the web
 app, you can do here. The command table is generated from the API's
 contract-tested OpenAPI spec, so what this skill describes is what the binary
@@ -66,10 +67,21 @@ work contacts update 12 --title "CTO"
 work contacts delete 12                          # contacts, companies, deals, projects, tasks
 ```
 
-Resources: `companies` (name, domain, address), `contacts`, `deals`
-(name, stage, --value-cents, --expected-close-on, --company-id,
---contact-id), `projects` and `tasks` from the Projects layer, `invoices`
-and `payments` (read-only — money in goes through the invoice, below).
+The whole surface, with every writable flag (`work help <resource>` is
+the ground truth at the installed version):
+
+| Resource | Verbs | Writable flags |
+| --- | --- | --- |
+| `companies` | list, show, create, update, delete | `--name --domain --address` |
+| `contacts` | list, show, create, update, delete | `--first-name --last-name --email --phone --title --company-id` |
+| `deals` | list, show, create, update, delete | `--name --stage --value-cents --expected-close-on --company-id --contact-id --owner-id` |
+| `projects` | list, show, create, update, delete | `--name --status --description --due-on --company-id --deal-id` |
+| `tasks` | list, show, create, update, delete | `--title --status --description --due-on --project-id --assignee-id` |
+| `invoices` | list, show, create + `send`, `pay` | `--issue-on --due-on --subject --notes --company-id --contact-id --lines` |
+| `payments` | list, show | read-only — money in goes through `invoices pay`, below |
+
+`projects` and `tasks` come from the Projects layer and answer 404 on an
+account without it.
 
 Moving a deal through the pipeline is an update of its stage:
 

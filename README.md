@@ -1,10 +1,10 @@
 # The work CLI
 
 `work` — the command line for [Work](https://work.betterthangood.xyz), the
-system a business runs on. One Go binary covering the whole public API:
-CRM (companies, contacts, deals), invoicing and payments, projects and
-tasks. Anything a person can do in the web app, you — or your agent — can
-do here.
+small business tool that helps you win the work, deliver it and get paid.
+One Go binary covering the whole public API: CRM (companies, contacts,
+deals), invoicing and payments, projects and tasks. Anything a person can
+do in the web app, you — or your agent — can do here.
 
 Full documentation: [docs.betterthangood.xyz/work/cli](https://docs.betterthangood.xyz/work/cli).
 
@@ -50,6 +50,12 @@ work <resource> <verb> [id] [--flags]
 
 `work help` prints the whole surface; `work help <resource>` lists a
 resource's every verb and flag. Help never needs a token.
+
+| Resource | Verbs |
+| --- | --- |
+| `companies`, `contacts`, `deals`, `projects`, `tasks` | `list`, `show`, `create`, `update`, `delete` |
+| `invoices` | `list`, `show`, `create`, plus `send` and `pay` — no update or delete; a sent invoice is a record |
+| `payments` | `list`, `show` — read-only; money in goes through `work invoices pay` |
 
 ```sh
 work contacts list
