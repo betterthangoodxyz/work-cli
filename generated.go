@@ -35,6 +35,7 @@ var specResources = []resourceSpec{
 		fields: []fieldSpec{
 			{name: "name", flag: "name", kind: fieldString},
 			{name: "stage", flag: "stage", kind: fieldString},
+			{name: "lost_reason", flag: "lost-reason", kind: fieldString},
 			{name: "value_cents", flag: "value-cents", kind: fieldInt},
 			{name: "expected_close_on", flag: "expected-close-on", kind: fieldString},
 			{name: "company_id", flag: "company-id", kind: fieldInt},

@@ -120,6 +120,9 @@
           "stage": {
             "type": "string"
           },
+          "lost_reason": {
+            "type": "string"
+          },
           "value_cents": {
             "type": "integer"
           },
@@ -1435,6 +1438,9 @@
                       "stage": {
                         "type": "string"
                       },
+                      "lost_reason": {
+                        "type": "string"
+                      },
                       "value_cents": {
                         "type": "integer"
                       },
@@ -1656,6 +1662,9 @@
                         "type": "string"
                       },
                       "stage": {
+                        "type": "string"
+                      },
+                      "lost_reason": {
                         "type": "string"
                       },
                       "value_cents": {
