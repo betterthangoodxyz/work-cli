@@ -1,6 +1,6 @@
 ---
 name: work
-description: Run a customer's Work account — CRM (companies, contacts, deals), invoices, and projects/tasks — through the `work` CLI. Use whenever asked to create, list, update, or read anything in Work, or to onboard a customer's book of business into it.
+description: Run a customer's Work account — CRM (companies, contacts, deals), invoices and bills, and projects/tasks — through the `work` CLI. Use whenever asked to create, list, update, or read anything in Work, or to onboard a customer's book of business into it.
 ---
 
 # Work
@@ -76,6 +76,7 @@ the ground truth at the installed version):
 | `projects` | list, show, create, update, delete | `--name --status --description --due-on --company-id --deal-id` |
 | `tasks` | list, show, create, update, delete | `--title --status --description --due-on --project-id --assignee-id` |
 | `invoices` | list, show | read-only — invoices are created by CSV import in the web app |
+| `bills` | list, show | read-only — bills are money owed out, written in the web app |
 
 `projects` and `tasks` come from the Projects layer and answer 404 on an
 account without it.
@@ -86,15 +87,21 @@ Moving a deal through the pipeline is an update of its stage:
 work deals update 412 --stage won
 ```
 
-### Invoices are read-only
+### Invoices and bills are read-only
 
-Invoices are authored outside the API — a person imports them from a CSV in
-the web app — so the CLI only lists and shows them:
+Money records are authored outside the API — invoices are imported from a CSV
+and bills are written in the web app — so the CLI only lists and shows them:
 
 ```sh
 work invoices list [--page N] [--per-page N]
 work invoices show 88
+work bills list [--page N] [--per-page N]
+work bills show 12
 ```
+
+An invoice is money owed in, a bill money owed out; both carry a `project_id`
+where the account has the Projects layer, which is what a project's
+profitability adds up.
 
 ## Conventions for agents
 

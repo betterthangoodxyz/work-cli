@@ -48,6 +48,10 @@ var specResources = []resourceSpec{
 		ops: opList | opShow,
 	},
 	{
+		name: "bills", singular: "bill", paramKey: "bill",
+		ops: opList | opShow,
+	},
+	{
 		name: "projects", singular: "project", paramKey: "project",
 		ops: opList | opShow | opCreate | opUpdate | opDelete,
 		fields: []fieldSpec{
