@@ -88,7 +88,9 @@ func expectOps(t *testing.T, name string, spec resourceSpec, collection, member 
 func TestEveryActionInTheSpecIsACommand(t *testing.T) {
 	for path, operations := range specPaths(t) {
 		segments := strings.Split(strings.TrimPrefix(path, "/"), "/")
-		if len(segments) != 3 {
+		// An action is a POST to a member; the invoice sync write is a PUT
+		// on a three-segment path, and bin/docs leaves it out of the table.
+		if _, post := operations["post"]; len(segments) != 3 || !post {
 			continue
 		}
 		parent, leaf := segments[0], segments[2]
@@ -110,10 +112,6 @@ func TestEveryActionInTheSpecIsACommand(t *testing.T) {
 			t.Errorf("%s %s: path = %q, want %q", parent, verb, action.path, want)
 		}
 		post, _ := operations["post"].(map[string]any)
-		if post == nil {
-			t.Errorf("%s is not a POST in the spec", path)
-			continue
-		}
 		assertFields(t, parent+" "+verb, action.fields, specBodyFields(t, post))
 		if len(action.fields) > 0 && action.paramKey == "" {
 			t.Errorf("%s %s: a body without a paramKey would not be wrapped", parent, verb)
