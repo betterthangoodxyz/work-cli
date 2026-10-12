@@ -70,6 +70,13 @@
           "title": {
             "type": "string"
           },
+          "birthday": {
+            "type": "string",
+            "format": "date"
+          },
+          "address": {
+            "type": "string"
+          },
           "company_id": {
             "type": "integer"
           },
@@ -130,6 +137,10 @@
             "type": "string"
           },
           "expected_close_on": {
+            "type": "string",
+            "format": "date"
+          },
+          "won_on": {
             "type": "string",
             "format": "date"
           },
@@ -199,6 +210,19 @@
           },
           "project_id": {
             "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "external_id": {
+            "type": "string"
+          },
+          "external_url": {
+            "type": "string"
+          },
+          "synced_at": {
+            "type": "string",
+            "format": "date-time"
           },
           "created_at": {
             "type": "string",
@@ -483,6 +507,13 @@
                       "title": {
                         "type": "string"
                       },
+                      "birthday": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "address": {
+                        "type": "string"
+                      },
                       "company_id": {
                         "type": "integer"
                       }
@@ -700,6 +731,13 @@
                         "type": "string"
                       },
                       "title": {
+                        "type": "string"
+                      },
+                      "birthday": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "address": {
                         "type": "string"
                       },
                       "company_id": {
@@ -1512,6 +1550,10 @@
                         "type": "string",
                         "format": "date"
                       },
+                      "won_on": {
+                        "type": "string",
+                        "format": "date"
+                      },
                       "company_id": {
                         "type": "integer"
                       },
@@ -1735,6 +1777,10 @@
                         "type": "integer"
                       },
                       "expected_close_on": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "won_on": {
                         "type": "string",
                         "format": "date"
                       },
@@ -3300,6 +3346,203 @@
         "responses": {
           "204": {
             "description": "Deleted."
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "The account’s subscription is not active.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token lacks the scope this action needs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such record in this account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The record could not be saved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/invoices/{source}/{external_id}": {
+      "put": {
+        "operationId": "syncInvoice",
+        "summary": "Create or replace an invoice from an accounting system",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "invoice": {
+                    "type": "object",
+                    "properties": {
+                      "number": {
+                        "type": "integer"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "currency": {
+                        "type": "string"
+                      },
+                      "issue_on": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "due_on": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "sent_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "subject": {
+                        "type": "string"
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "external_url": {
+                        "type": "string"
+                      },
+                      "customer": {
+                        "type": "object",
+                        "properties": {
+                          "external_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "lines": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "description": {
+                              "type": "string"
+                            },
+                            "quantity": {
+                              "type": "number"
+                            },
+                            "unit_price_cents": {
+                              "type": "integer"
+                            },
+                            "discount_basis_points": {
+                              "type": "integer"
+                            },
+                            "tax_rate_basis_points": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The invoice, as it now stands.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Invoice"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The invoice, newly created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Invoice"
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Missing or invalid access token.",
