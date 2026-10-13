@@ -64,6 +64,7 @@ var specResources = []resourceSpec{
 			{name: "due_on", flag: "due-on", kind: fieldString},
 			{name: "company_id", flag: "company-id", kind: fieldInt},
 			{name: "deal_id", flag: "deal-id", kind: fieldInt},
+			{name: "shared", flag: "shared", kind: fieldString},
 		},
 	},
 	{
@@ -76,6 +77,15 @@ var specResources = []resourceSpec{
 			{name: "due_on", flag: "due-on", kind: fieldString},
 			{name: "project_id", flag: "project-id", kind: fieldInt},
 			{name: "assignee_id", flag: "assignee-id", kind: fieldInt},
+		},
+	},
+	{
+		name: "project_links", singular: "project_link", paramKey: "project_link",
+		ops: opList | opShow | opCreate | opUpdate | opDelete,
+		fields: []fieldSpec{
+			{name: "project_id", flag: "project-id", kind: fieldInt},
+			{name: "label", flag: "label", kind: fieldString},
+			{name: "url", flag: "url", kind: fieldString},
 		},
 	},
 }

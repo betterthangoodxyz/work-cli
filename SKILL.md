@@ -73,13 +73,22 @@ the ground truth at the installed version):
 | `companies` | list, show, create, update, delete | `--name --domain --address` |
 | `contacts` | list, show, create, update, delete | `--first-name --last-name --email --phone --title --company-id` |
 | `deals` | list, show, create, update, delete | `--name --stage --value-cents --expected-close-on --company-id --contact-id --owner-id` |
-| `projects` | list, show, create, update, delete | `--name --status --description --due-on --company-id --deal-id` |
+| `projects` | list, show, create, update, delete | `--name --status --description --due-on --company-id --deal-id --shared` |
 | `tasks` | list, show, create, update, delete | `--title --status --description --due-on --project-id --assignee-id` |
+| `project_links` | list, show, create, update, delete | `--project-id --label --url` |
 | `invoices` | list, show | read-only — invoices are created by CSV import in the web app |
 | `bills` | list, show | read-only — bills are money owed out, written in the web app |
 
-`projects` and `tasks` come from the Projects layer and answer 404 on an
-account without it.
+`projects`, `tasks` and `project_links` come from the Projects layer and
+answer 404 on an account without it.
+
+Sharing a project shows it, and its links, to its company’s people in the
+customer portal. It needs a company, and a Contractor can’t share:
+
+```sh
+work projects update 4 --shared true
+work project_links create --project-id 4 --label "Staging site" --url https://staging.example.com
+```
 
 Moving a deal through the pipeline is an update of its stage:
 
