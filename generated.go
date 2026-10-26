@@ -78,4 +78,21 @@ var specResources = []resourceSpec{
 			{name: "assignee_id", flag: "assignee-id", kind: fieldInt},
 		},
 	},
+	{
+		name: "project_customers", singular: "project_customer", paramKey: "project_customer",
+		ops: opList | opShow | opCreate | opDelete,
+		fields: []fieldSpec{
+			{name: "project_id", flag: "project-id", kind: fieldInt},
+			{name: "contact_id", flag: "contact-id", kind: fieldInt},
+		},
+	},
+	{
+		name: "project_links", singular: "project_link", paramKey: "project_link",
+		ops: opList | opShow | opCreate | opUpdate | opDelete,
+		fields: []fieldSpec{
+			{name: "project_id", flag: "project-id", kind: fieldInt},
+			{name: "label", flag: "label", kind: fieldString},
+			{name: "url", flag: "url", kind: fieldString},
+		},
+	},
 }

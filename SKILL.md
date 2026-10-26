@@ -75,11 +75,16 @@ the ground truth at the installed version):
 | `deals` | list, show, create, update, delete | `--name --stage --value-cents --expected-close-on --company-id --contact-id --owner-id` |
 | `projects` | list, show, create, update, delete | `--name --status --description --due-on --company-id --deal-id` |
 | `tasks` | list, show, create, update, delete | `--title --status --description --due-on --project-id --assignee-id` |
+| `project_customers` | list, show, create, delete | `--project-id --contact-id` |
+| `project_links` | list, show, create, update, delete | `--project-id --label --url` |
 | `invoices` | list, show | read-only — invoices are created by CSV import in the web app |
 | `bills` | list, show | read-only — bills are money owed out, written in the web app |
 
-`projects` and `tasks` come from the Projects layer and answer 404 on an
-account without it.
+`projects`, `tasks`, `project_customers` and `project_links` come from the
+Projects layer and answer 404 on an account without it. A project customer
+puts someone at the customer on a project and emails them a way into the
+customer portal, so the contact needs an email; a project link is a URL
+shown to those people. Both need full project access.
 
 Moving a deal through the pipeline is an update of its stage:
 
