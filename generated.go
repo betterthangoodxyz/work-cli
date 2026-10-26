@@ -47,6 +47,17 @@ var specResources = []resourceSpec{
 		},
 	},
 	{
+		name: "activities", singular: "activity", paramKey: "activity",
+		ops: opList | opShow | opCreate | opUpdate | opDelete,
+		fields: []fieldSpec{
+			{name: "deal_id", flag: "deal-id", kind: fieldInt},
+			{name: "title", flag: "title", kind: fieldString},
+			{name: "due_at", flag: "due-at", kind: fieldString},
+			{name: "user_id", flag: "user-id", kind: fieldInt},
+			{name: "done", flag: "done", kind: fieldString},
+		},
+	},
+	{
 		name: "invoices", singular: "invoice", paramKey: "invoice",
 		ops: opList | opShow,
 	},

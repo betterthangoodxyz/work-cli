@@ -73,6 +73,7 @@ the ground truth at the installed version):
 | `companies` | list, show, create, update, delete | `--name --domain --address` |
 | `contacts` | list, show, create, update, delete | `--first-name --last-name --email --phone --title --company-id` |
 | `deals` | list, show, create, update, delete | `--name --stage --value-cents --expected-close-on --company-id --contact-id --owner-id` |
+| `activities` | list, show, create, update, delete | `--deal-id --title --due-at --user-id --done` |
 | `projects` | list, show, create, update, delete | `--name --status --description --due-on --company-id --deal-id` |
 | `tasks` | list, show, create, update, delete | `--title --status --description --due-on --project-id --assignee-id` |
 | `project_links` | list, show, create, update, delete | `--project-id --label --url` |
@@ -96,6 +97,15 @@ Moving a deal through the pipeline is an update of its stage:
 
 ```sh
 work deals update 412 --stage won
+```
+
+An activity is the next thing to do on a deal, by someone, by a time.
+`--due-at` takes ISO 8601 with an offset (UTC without one), and
+`--done true` completes one, `--done false` reopens it:
+
+```sh
+work activities create --deal-id 412 --title "Call Dana about the proposal" --due-at 2026-11-03T14:00:00-05:00
+work activities update 97 --done true
 ```
 
 ### Invoices and bills are read-only
