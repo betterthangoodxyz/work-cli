@@ -71,8 +71,7 @@
             "type": "string"
           },
           "birthday": {
-            "type": "string",
-            "format": "date"
+            "type": "string"
           },
           "address": {
             "type": "string"
@@ -558,8 +557,7 @@
                         "type": "string"
                       },
                       "birthday": {
-                        "type": "string",
-                        "format": "date"
+                        "type": "string"
                       },
                       "address": {
                         "type": "string"
@@ -784,8 +782,7 @@
                         "type": "string"
                       },
                       "birthday": {
-                        "type": "string",
-                        "format": "date"
+                        "type": "string"
                       },
                       "address": {
                         "type": "string"
