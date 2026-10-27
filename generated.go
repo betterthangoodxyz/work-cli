@@ -29,7 +29,9 @@ var specResources = []resourceSpec{
 		fields: []fieldSpec{
 			{name: "name", flag: "name", kind: fieldString},
 			{name: "domain", flag: "domain", kind: fieldString},
+			{name: "email", flag: "email", kind: fieldString},
 			{name: "address", flag: "address", kind: fieldString},
+			{name: "lead", flag: "lead", kind: fieldString},
 		},
 	},
 	{

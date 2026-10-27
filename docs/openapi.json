@@ -104,8 +104,14 @@
           "domain": {
             "type": "string"
           },
+          "email": {
+            "type": "string"
+          },
           "address": {
             "type": "string"
+          },
+          "lead": {
+            "type": "boolean"
           },
           "created_at": {
             "type": "string",
@@ -1123,8 +1129,14 @@
                       "domain": {
                         "type": "string"
                       },
+                      "email": {
+                        "type": "string"
+                      },
                       "address": {
                         "type": "string"
+                      },
+                      "lead": {
+                        "type": "boolean"
                       }
                     }
                   }
@@ -1333,8 +1345,14 @@
                       "domain": {
                         "type": "string"
                       },
+                      "email": {
+                        "type": "string"
+                      },
                       "address": {
                         "type": "string"
+                      },
+                      "lead": {
+                        "type": "boolean"
                       }
                     }
                   }
