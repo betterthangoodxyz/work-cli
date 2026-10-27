@@ -20,6 +20,7 @@ var specResources = []resourceSpec{
 			{name: "birthday", flag: "birthday", kind: fieldString},
 			{name: "address", flag: "address", kind: fieldString},
 			{name: "company_id", flag: "company-id", kind: fieldInt},
+			{name: "lead", flag: "lead", kind: fieldString},
 		},
 	},
 	{
