@@ -10,7 +10,7 @@ set -euo pipefail
 
 cli="$(cd "$(dirname "$0")/.." && pwd)"
 
-STATICCHECK="honnef.co/go/tools/cmd/staticcheck@2026.2.1"
+STATICCHECK="honnef.co/go/tools/cmd/staticcheck@2026.2.2"
 GOCYCLO="github.com/fzipp/gocyclo/cmd/gocyclo@v0.6.0"
 DUPL="github.com/mibk/dupl@v1.0.0"
 
